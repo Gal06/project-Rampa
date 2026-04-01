@@ -3,20 +3,44 @@
 const ARSO = (() => {
   const CACHE_PREFIX = 'project_rampa_';
 
-  // --- Fetch ---
+  // --- Fetch z retry + fallback proxy ---
+
+  const PROXIES = [
+    {
+      build: (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+      parse: async (r) => { const j = await r.json(); if (!j.contents) throw new Error('Prazen odgovor'); return j.contents; },
+    },
+    {
+      build: (u) => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+      parse: async (r) => r.text(),
+    },
+    {
+      build: (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+      parse: async (r) => r.text(),
+    },
+  ];
 
   async function fetchXml(url) {
-    const proxyUrl = CONFIG.arso.proxy(url);
-    const resp = await fetch(proxyUrl);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const json = await resp.json();
-    if (!json.contents) throw new Error('Prazen odgovor proxy strežnika');
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(json.contents, 'text/xml');
-    // Preveri XML parse napako
-    const parseErr = doc.querySelector('parsererror');
-    if (parseErr) throw new Error('XML parse napaka');
-    return doc;
+    let lastErr;
+    for (const proxy of PROXIES) {
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 8000);
+          const resp = await fetch(proxy.build(url), { signal: controller.signal });
+          clearTimeout(timeout);
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          const xmlText = await proxy.parse(resp);
+          const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+          if (doc.querySelector('parsererror')) throw new Error('XML parse napaka');
+          return doc;
+        } catch (err) {
+          lastErr = err;
+          if (attempt === 1) await new Promise((r) => setTimeout(r, 800));
+        }
+      }
+    }
+    throw lastErr;
   }
 
   // --- Parse ---
