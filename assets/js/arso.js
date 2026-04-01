@@ -7,6 +7,12 @@ const ARSO = (() => {
 
   const PROXIES = [
     {
+      // Vercel serverless funkcija — hitra, zanesljiva (samo na Vercelu)
+      build: () => `/api/arso`,
+      parse: async (r) => r.text(),
+      onlyOnServer: true,
+    },
+    {
       build: (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
       parse: async (r) => { const j = await r.json(); if (!j.contents) throw new Error('Prazen odgovor'); return j.contents; },
     },
@@ -14,15 +20,14 @@ const ARSO = (() => {
       build: (u) => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
       parse: async (r) => r.text(),
     },
-    {
-      build: (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-      parse: async (r) => r.text(),
-    },
   ];
+
+  const isHosted = window.location.protocol === 'https:';
 
   async function fetchXml(url) {
     let lastErr;
     for (const proxy of PROXIES) {
+      if (proxy.onlyOnServer && !isHosted) continue;
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
           const controller = new AbortController();
