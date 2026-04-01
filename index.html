@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0d1b2a" />
+  <meta name="description" content="Project Rampa — pretok vode na slovenskih rekah za kajakaše" />
+  <title>Project Rampa</title>
+
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+  <!-- Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+
+  <!-- Naše skripte — vrstni red je pomemben -->
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/arso.js" defer></script>
+  <script src="assets/js/charts.js" defer></script>
+  <script src="assets/js/forecast.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+</head>
+<body>
+
+  <!-- Glava -->
+  <header>
+    <div class="header-brand">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <!-- Kajak ikona (stilizirana) -->
+        <ellipse cx="16" cy="16" rx="14" ry="7" stroke="#FF6B35" stroke-width="2" fill="none"/>
+        <line x1="4" y1="16" x2="28" y2="16" stroke="#FF6B35" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <ellipse cx="16" cy="16" rx="4" ry="3" fill="#FF6B35"/>
+        <line x1="16" y1="6" x2="16" y2="26" stroke="#5b9bd5" stroke-width="1.5"/>
+      </svg>
+      <div>
+        <h1>Project <span>Rampa</span></h1>
+      </div>
+    </div>
+
+    <div class="header-meta">
+      <div class="theme-switcher" aria-label="Izbira teme">
+        <button class="theme-btn active" data-t="blue"   title="Temna tema"></button>
+        <button class="theme-btn"        data-t="white"  title="Svetla tema"></button>
+        <button class="theme-btn"        data-t="crypto" title="Crypto tema">₿</button>
+      </div>
+      <span class="last-updated" id="last-updated">Nalagam...</span>
+      <button class="btn-refresh" id="btn-refresh" aria-label="Osveži podatke">
+        <span class="icon">↻</span>
+        Osveži
+      </button>
+    </div>
+  </header>
+
+  <!-- Crypto ozadje -->
+  <div class="crypto-bg" id="crypto-bg"></div>
+
+  <!-- Error banner -->
+  <div class="error-banner" id="error-banner" role="alert">
+    ⚠ Napaka pri pridobivanju podatkov z ARSO. Preveri konzolo (F12) za podrobnosti. Prikazujem shranjene podatke.
+  </div>
+
+  <!-- Filter -->
+  <nav class="filter-bar" aria-label="Filter po reki">
+    <button class="filter-btn active" data-river="all">Vse</button>
+    <button class="filter-btn" data-river="Soča">Soča</button>
+    <button class="filter-btn" data-river="Sava">Sava</button>
+    <button class="filter-btn" data-river="Savinja">Savinja</button>
+  </nav>
+
+  <!-- Povzetek stanja -->
+  <div class="summary-bar" id="summary-bar"></div>
+
+  <!-- Kartice -->
+  <main>
+    <div class="cards-grid" id="cards-grid"></div>
+  </main>
+
+  <!-- Modal — detail pogled -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div>
+          <span class="river-tag" id="modal-river"></span>
+          <h2 id="modal-title">—</h2>
+        </div>
+        <button class="btn-close" id="btn-close-modal" aria-label="Zapri">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-stats" id="modal-stats"></div>
+        <div class="chart-container">
+          <canvas id="detail-chart"></canvas>
+        </div>
+        <div class="clubs-list" id="modal-clubs"></div>
+        <div class="forecast-section" id="modal-forecast"></div>
+        <div class="map-container" id="modal-map"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Noga -->
+  <footer>
+    <p>Podatki: <a href="https://www.arso.gov.si" target="_blank" rel="noopener">ARSO — Agencija RS za okolje</a></p>
+    <p style="margin-top: 0.3rem; font-size: 0.75rem;">Pragovi so informativni. Vedno upoštevaj lokalne razmere in izkušnje.</p>
+    <p style="margin-top: 0.6rem; font-size: 0.75rem; color: #5b9bd5;">© 2026 Gal Godnov. All rights reserved.</p>
+    <p style="margin-top: 0.8rem; font-size: 0.82rem; color: var(--text-muted);">Kakšen problem? Pokličite nas na <a href="tel:070428080" style="color: var(--accent); font-weight: 600;">070 428 080</a></p>
+  </footer>
+
+</body>
+</html>
